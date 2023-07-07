@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>检测结果展示</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+
+<p><span>图片展示</span></p>
+
+<div class="js-upload uk-placeholder uk-text-center">
+    <img src="{{url}}">
+    <form class="uk-form-horizontal" action="/inferIMG" method="post">
+        <input type="submit" value="开始预测">
+    </form>
+</div>
+
+</body>
+</html>
