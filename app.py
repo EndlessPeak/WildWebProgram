@@ -1,8 +1,29 @@
-from flask import Flask, render_template, session, request
+'''
+python flask part 
+1. Flask is the flask micorframework's core package for python web program
+2. render_template provides functionality to render HTML templates and process dynamic data
+3. session package provides a mechanism to store data between user requests
+4. request allows us to retrieve data from the HTTP requests sent by the client
+5. send_from_directory can be used to send files from a specified directory as a response
+'''
+from flask import Flask
+from flask import render_template
+from flask import session
+from flask import request 
+from flask import send_from_directory
+
+'''
+python basic part
+1. os provides functionality for interacting with the operating system
+2. hashlib contains implementations of various hash algorithms,we use the sha-1 part
+3. uuid allows us to generate universally unique identifiers,we use it for unique folder name
+4. secrets provides functionality for generating cryptographically secure random numbers
+   we set unique key for flask and enable session
+'''
 import os
-import hashlib # hash the picture and generate uid
+import hashlib
 import uuid
-import secrets # set unique key for flask and enable session
+import secrets 
 from utils.infer_image_module import infer_image_backend
 
 # Constant
@@ -28,7 +49,26 @@ def index():
     session['user'] = 'LeeSin'
     return render_template("index.html")
 
-# upload file for infer module
+'''
+The following part is responsible for send files from specified folders to the client
+Warning: Do not store any user-uploaded content or system calculation results in the static folder!
+'''
+UPLOAD_IMAGE_FOLDER = './sources/x_image'
+INFER_IMAGE_FOLDER = './sources/y_image'
+app.config['UPLOAD_IMAGE_FOLDER'] = UPLOAD_IMAGE_FOLDER
+app.config['INFER_IMAGE_FOLDER'] = INFER_IMAGE_FOLDER
+
+@app.route('/request_upload_image/<filename>')
+def display_upload_image(filename):
+    return send_from_directory(app.config['UPLOAD_IMAGE_FOLDER'],filename)
+
+@app.route('/request_infer_image/<filename>')
+def display_infer_image(filename):
+    return send_from_directory(app.config['INFER_IMAGE_FOLDER'],filename)
+
+'''
+The following part is responsible for uploading files,mainly user images.
+'''
 @app.route('/upload_image', methods=['GET', 'POST'])
 def upload_image():
     if request.method == 'POST':
@@ -47,7 +87,7 @@ def upload_image():
         print(uid)
         
         fname = uid +'.jpg'
-        file_path = os.path.join(r'./static/sources/x_image', fname)
+        file_path = os.path.join(r'./sources/x_image', fname)
 
         # make sure the directory exist
         os.makedirs(os.path.dirname(file_path),exist_ok=True)
@@ -55,20 +95,27 @@ def upload_image():
 
         # try move the pointer to the beginning of the file
         f.stream.seek(0)
+
         f.save(file_path)
         fName = f.filename
-        return render_template('display_upload_image.html',url = file_path)
+
+        upload_image_url = '/request_upload_image/' + fname
+        return render_template('display_upload_image.html',url = upload_image_url)
     else:
         # browse image's default method is get,so we will render its page 
         return render_template('upload_image.html')
 
+'''
+The following part is responsible for infering image files.
+After the user-uploaded file is stored, it will be sent to the inference module in the backend.
+'''
 @app.route('/infer_image', methods=['GET', 'POST'])
 def infer_image():
     global uid
 
     # set input and output path
-    inputdir = r'./static/sources/x_image/'+uid+'.jpg'
-    outputdir = r'./static/sources/y_image/'+uid+'.jpg'
+    inputdir = r'./sources/x_image/'+uid+'.jpg'
+    outputdir = r'./sources/y_image/'+uid+'.jpg'
     print(inputdir)
     # print('./static/sources/x_image/'+fName)
 
