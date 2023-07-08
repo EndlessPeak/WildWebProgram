@@ -1,1 +1,3 @@
 sources
+static/output_inference
+*.pyc

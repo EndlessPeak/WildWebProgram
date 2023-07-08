@@ -53,8 +53,8 @@ def index():
 The following part is responsible for send files from specified folders to the client
 Warning: Do not store any user-uploaded content or system calculation results in the static folder!
 '''
-UPLOAD_IMAGE_FOLDER = './sources/x_image'
-INFER_IMAGE_FOLDER = './sources/y_image'
+UPLOAD_IMAGE_FOLDER = './sources/x_image/'
+INFER_IMAGE_FOLDER = './sources/y_image/'
 app.config['UPLOAD_IMAGE_FOLDER'] = UPLOAD_IMAGE_FOLDER
 app.config['INFER_IMAGE_FOLDER'] = INFER_IMAGE_FOLDER
 
@@ -74,6 +74,7 @@ def upload_image():
     if request.method == 'POST':
         # when user click submit button,the following codes will handle request
         global uid
+        global fName
         # uid = str(uuid.uuid1())
 
         # planning to generate uuid by hash the file
@@ -86,8 +87,8 @@ def upload_image():
         uid = str(uuid.uuid5(uuid.NAMESPACE_DNS,file_hash))
         print(uid)
         
-        fname = uid +'.jpg'
-        file_path = os.path.join(r'./sources/x_image', fname)
+        fName = uid +'.jpg'
+        file_path = os.path.join(r'./sources/x_image', fName)
 
         # make sure the directory exist
         os.makedirs(os.path.dirname(file_path),exist_ok=True)
@@ -97,9 +98,9 @@ def upload_image():
         f.stream.seek(0)
 
         f.save(file_path)
-        fName = f.filename
+        # fName = f.filename
 
-        upload_image_url = '/request_upload_image/' + fname
+        upload_image_url = '/request_upload_image/' + fName
         return render_template('display_upload_image.html',url = upload_image_url)
     else:
         # browse image's default method is get,so we will render its page 
@@ -112,19 +113,25 @@ After the user-uploaded file is stored, it will be sent to the inference module 
 @app.route('/infer_image', methods=['GET', 'POST'])
 def infer_image():
     global uid
+    global fName
 
     # set input and output path
-    inputdir = r'./sources/x_image/'+uid+'.jpg'
-    outputdir = r'./sources/y_image/'+uid+'.jpg'
-    print(inputdir)
+    # inputdir = r'./sources/x_image/'+uid+'.jpg'
+    # outputdir = r'./sources/y_image/'+uid+'.jpg'
+    inputdir = app.config['UPLOAD_IMAGE_FOLDER'] + fName # uid + '.jpg'
+    outputdir = app.config['INFER_IMAGE_FOLDER'] + fName # uid + '.jpg'
+    # print(inputdir)
     # print('./static/sources/x_image/'+fName)
 
-    infer_image_backend(inputdir,outputdir)
+    infer_image_backend(inputdir,outputdir,app)
+
+    infer_image_url = '/request_infer_image/' + fName
+
     # clean uid and fName variables
     # the process should be delayed
     uid = ''
-
-    return render_template('display_predict_result.html',url=outputdir)
+    fName = ''
+    return render_template('display_predict_result.html',url=infer_image_url)
 
 if __name__=='__main__':
     host = '127.0.0.1'
