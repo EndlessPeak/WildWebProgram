@@ -1,3 +1,4 @@
 sources
 static/output_inference
 *.pyc
+static/config.json

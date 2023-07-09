@@ -24,6 +24,8 @@ import os
 import hashlib
 import uuid
 import secrets 
+import threading
+
 from utils.infer_image_module import infer_image_backend
 
 # Constant
@@ -71,40 +73,41 @@ The following part is responsible for uploading files,mainly user images.
 '''
 @app.route('/upload_image', methods=['GET', 'POST'])
 def upload_image():
-    if request.method == 'POST':
-        # when user click submit button,the following codes will handle request
-        global uid
-        global fName
-        # uid = str(uuid.uuid1())
-
-        # planning to generate uuid by hash the file
-        # uuid5 will generate sha-1 hash by specified namespace and file content
-        f = request.files['file']
-        print(request.files)
-        # note that stream must be decoded to string
-        file_content = f.stream.read()
-        file_hash = hashlib.sha1(file_content).hexdigest()
-        uid = str(uuid.uuid5(uuid.NAMESPACE_DNS,file_hash))
-        print(uid)
-        
-        fName = uid +'.jpg'
-        file_path = os.path.join(r'./sources/x_image', fName)
-
-        # make sure the directory exist
-        os.makedirs(os.path.dirname(file_path),exist_ok=True)
-        print(file_path)
-
-        # try move the pointer to the beginning of the file
-        f.stream.seek(0)
-
-        f.save(file_path)
-        # fName = f.filename
-
-        upload_image_url = '/request_upload_image/' + fName
-        return render_template('display_upload_image.html',url = upload_image_url)
-    else:
+    if request.method == 'GET':
         # browse image's default method is get,so we will render its page 
         return render_template('upload_image.html')
+
+    # Following is the POST part
+    # when user click submit button,the following codes will handle request
+    global uid
+    global fName
+    # uid = str(uuid.uuid1())
+
+    # planning to generate uuid by hash the file
+    # uuid5 will generate sha-1 hash by specified namespace and file content
+    f = request.files['file']
+    print(request.files)
+    # note that stream must be decoded to string
+    file_content = f.stream.read()
+    file_hash = hashlib.sha1(file_content).hexdigest()
+    uid = str(uuid.uuid5(uuid.NAMESPACE_DNS,file_hash))
+    print(uid)
+
+    fName = uid +'.jpg'
+    file_path = os.path.join(r'./sources/x_image', fName)
+
+    # make sure the directory exist
+    os.makedirs(os.path.dirname(file_path),exist_ok=True)
+    print(file_path)
+
+    # try move the pointer to the beginning of the file
+    f.stream.seek(0)
+
+    f.save(file_path)
+    # fName = f.filename
+
+    upload_image_url = '/request_upload_image/' + fName
+    return render_template('display_upload_image.html',url = upload_image_url)
 
 '''
 The following part is responsible for infering image files.
@@ -116,14 +119,12 @@ def infer_image():
     global fName
 
     # set input and output path
-    # inputdir = r'./sources/x_image/'+uid+'.jpg'
-    # outputdir = r'./sources/y_image/'+uid+'.jpg'
-    inputdir = app.config['UPLOAD_IMAGE_FOLDER'] + fName # uid + '.jpg'
-    outputdir = app.config['INFER_IMAGE_FOLDER'] + fName # uid + '.jpg'
-    # print(inputdir)
-    # print('./static/sources/x_image/'+fName)
+    inputdir = app.config['UPLOAD_IMAGE_FOLDER'] + fName 
+    outputdir = app.config['INFER_IMAGE_FOLDER'] + fName 
 
-    infer_image_backend(inputdir,outputdir,app)
+    # Considering start a new thread to excute this function
+    t = threading.Thread(target = infer_image_backend, args=(inputdir,outputdir,app))
+    t.start()
 
     infer_image_url = '/request_infer_image/' + fName
 
