@@ -34,8 +34,9 @@ app = Flask(__name__,static_folder='static')
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # Global Variables
-uid = ''
-fName = ''
+uid = '' # indicate user id
+fid = '' # indicate file id
+fName = '' # indicate file name
 suid = ''
 bboxes = ''
 frame = ''
@@ -69,6 +70,13 @@ def display_infer_image(filename):
     return send_from_directory(app.config['INFER_IMAGE_FOLDER'],filename)
 
 '''
+The following part is responsible for user login
+'''
+@app.route('/login')
+def login():
+    return render_template("login.html")
+
+'''
 The following part is responsible for uploading files,mainly user images.
 '''
 @app.route('/upload_image', methods=['GET', 'POST'])
@@ -79,7 +87,7 @@ def upload_image():
 
     # Following is the POST part
     # when user click submit button,the following codes will handle request
-    global uid
+    global fid
     global fName
     # uid = str(uuid.uuid1())
 
@@ -90,10 +98,10 @@ def upload_image():
     # note that stream must be decoded to string
     file_content = f.stream.read()
     file_hash = hashlib.sha1(file_content).hexdigest()
-    uid = str(uuid.uuid5(uuid.NAMESPACE_DNS,file_hash))
-    print(uid)
+    fid = str(uuid.uuid5(uuid.NAMESPACE_DNS,file_hash))
+    print(fid)
 
-    fName = uid +'.jpg'
+    fName = fid +'.jpg'
     file_path = os.path.join(r'./sources/x_image', fName)
 
     # make sure the directory exist
@@ -115,7 +123,7 @@ After the user-uploaded file is stored, it will be sent to the inference module 
 '''
 @app.route('/infer_image', methods=['GET', 'POST'])
 def infer_image():
-    global uid
+    global fid
     global fName
 
     # set input and output path
@@ -128,9 +136,9 @@ def infer_image():
 
     infer_image_url = '/request_infer_image/' + fName
 
-    # clean uid and fName variables
+    # clean fid and fName variables
     # the process should be delayed
-    uid = ''
+    fid = ''
     fName = ''
     return render_template('display_predict_result.html',url=infer_image_url)
 

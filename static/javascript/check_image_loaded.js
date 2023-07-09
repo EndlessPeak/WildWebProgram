@@ -13,3 +13,12 @@ function checkImageLoaded() {
 window.addEventListener('load', function () {
     checkImageLoaded();
 });
+
+
+// 在页面加载时赋给脚本路径的参数，并本地存储
+window.addEventListener('DOMContentLoaded', function () {
+    var url = "{{ url }}";
+    // 将图片路径保存到 LocalStorage
+    localStorage.setItem("infer_image_path", url);
+    document.getElementById("infer-image-container").src = url;
+});

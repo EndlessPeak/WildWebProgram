@@ -1,4 +1,5 @@
 sources
 static/output_inference
-*.pyc
+static/layui
 static/config.json
+*.pyc
