@@ -3,29 +3,69 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>检测结果展示</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>野山参等级分类系统</title>
+    <link rel="stylesheet" href="static/layui/css/layui.css">
+    <link rel="stylesheet" href="static/layui/css/global.css">
+    <script src="static/layui/layui.js"></script>
 </head>
 
 <body>
-    <p><span>预测结果展示</span></p>
-    <div>
-        <p id="loading-message" style="display: block;">请稍等，执行图像推理需要大约5-10秒的时间。</p>
-        <img id="infer-image-container" src="{{ url }}">
+    <!-- header part -->
+    <div class="layui-header ws-header ws-bg-light">
+        <ul class="layui-nav" layui-bg-cyan>
+            <li class="layui-nav-item" style="padding:5px">野山参等级分类系统</li>
+        </ul>
     </div>
-    <div>
-        <a href="{{ url_for('index') }}">返回首页</a>
-        <a href="{{ url_for('index') }}">保存推理结果</a>
+
+    <div class="ws-container">
+        <div class="layui-container" style="padding: 20px;">
+            <p>预测结果展示</p>
+            <div>
+                <p id="loading-message" style="display: block;">请稍等，执行图像推理需要大约5-10秒的时间。</p>
+                <img id="infer-image-container" style="display: none;" src="{{ url }}">
+            </div>
+            <div>
+                <a href="{{ url_for('index') }}">返回首页</a>
+                <a href="{{ url_for('index') }}">保存推理结果</a>
+            </div>
+        </div>
     </div>
+
+    <div class="layui-footer ws-footer">
+        <p>
+            Copyright©2023
+            开发单位: 延边大学嵌入式系统实验室
+        </p>
+    </div>
+
+
 </body>
 
 <script>
-    var imgContainer = document.getElementById('infer-image-container');
-    var loadingMessage = document.getElementById('loading-message');
+    function checkImageLoaded() {
+        var img = document.getElementById('infer-image-container');
+        var loadingMessage = document.getElementById('loading-message');
+        if (img.complete && img.naturalWidth !== 0) {
+            // 图片加载成功
+            loadingMessage.style.display = 'none';
+            img.style.display = 'block'
+            layui.use('layer', function () {
+                var layer = layui.layer;
+                layer.msg('执行推理完成！', { icon: 1 });
+            });
+        } else {
+            // 图片尚未加载完成，继续轮询检查
+            location.reload();  // 刷新页面
+            setTimeout(checkImageLoaded, 1000);  // 每隔1秒检查一次
+        }
+    }
 
-    imgContainer.addEventListener('load', function () {
-        loadingMessage.style.display = 'none';
+    // 在页面加载完成后启动轮询检查
+    window.addEventListener('load', function () {
+        checkImageLoaded();
     });
+
 </script>
 
 </html>

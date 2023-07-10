@@ -114,7 +114,7 @@ def run(predictor, img):
         results.append(output_data)
     return results
 
-def infer_image_backend(inputdir,outputdir,app):
+def infer_image_backend(inputdir,outputdir,fName,app):
     print('Enter infer function')
     # Configure model parameters.
     # app.static_folder should be extend to "./static"
@@ -127,14 +127,31 @@ def infer_image_backend(inputdir,outputdir,app):
         print("File or folder don't exists!")
         return
 
+    # Read image
     image = cv2.imread(inputdir)
-
     if image is not None:
         print("Read image success!")
     else:
         print("Read image failed!")
         return
     
+    # Check the size of the image and crop it to the appropriate size.
+    # Consider abstract this part to a function
+    height, width = image.shape[:2]
+    start_row = int(height * 0.25)
+    end_row = int(height * 0.85)
+    start_col = int(width * 0.15)
+    end_col = int(width * 0.85)
+
+    # Crop image
+    image = image[start_row:end_row, start_col:end_col]
+    print("cropp image success.")
+
+    # Save cropped image
+    cropdir= os.path.join(app.config['CROP_IMAGE_FOLDER'], fName)
+    cv2.imwrite(cropdir,image)
+
+    # Start infer
     im_size = 640
     print("Prepare model")
     time_start = time.time()
@@ -151,5 +168,6 @@ def infer_image_backend(inputdir,outputdir,app):
     
     label_dict = {0: 'DY', 1: 'GradeA', 2: 'MYL', 3: 'YL', 4: 'Ding', 5: 'GradeB'}
 
-    img = Image.open(inputdir).convert('RGB')
+    # img = Image.open(inputdir).convert('RGB')
+    img = Image.open(cropdir).convert('RGB')
     draw_bbox(img, result[0], label_dict,out_path=outputdir)

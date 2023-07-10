@@ -1,21 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8"/>
-    <title>检测结果展示</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>野山参等级分类系统</title>
+    <link rel="stylesheet" href="static/layui/css/layui.css">
+    <link rel="stylesheet" href="static/layui/css/global.css">
+    <script src="static/layui/layui.js"></script>
 </head>
 
 <body>
+    <div class="layui-header ws-header ws-bg-light">
+        <ul class="layui-nav" layui-bg-cyan>
+            <li class="layui-nav-item" style="padding:5px">野山参等级分类系统</li>
+        </ul>
+    </div>
 
-<p><span>图片展示</span></p>
+    <div class="ws-container">
+        <div class="layui-container" style="padding: 20px;">
+            <p>图片展示</p>
 
-<div>
-    <img src="{{url}}">
-    <form action="/infer_image" method="post">
-        <input type="submit" value="开始预测">
-    </form>
-</div>
+            <div>
+                <img src="{{url}}">
+                <form action="/infer_image" method="post">
+                    <input class="layui-btn layui-btn-radius" lay-on="show-load-4" type="submit" value="开始预测">
+                </form>
+            </div>
+        </div>
+    </div>
 
+    <div class="layui-footer ws-footer">
+        <p>
+            Copyright©2023
+            开发单位: 延边大学嵌入式系统实验室
+        </p>
+    </div>
 </body>
+
+<script>
+    layui.use(function () {
+        var layer = layui.layer;
+        var util = layui.util;
+        util.on('lay-on', {
+            'show-load-4': function () {
+                layer.msg('开始进行推理，请勿刷新页面！', { icon: 0 }, function () {
+                    //回调
+                    layer.msg('执行推理大约需要5-10s时间，请耐心等待。请勿刷新页面！', {
+                        icon: 16,
+                        shade: 0.05
+                    });
+                });
+                //var loadIndex =
+                // 模拟关闭
+                setTimeout(function () {
+                    layer.close(loadIndex)
+                }, 5000);
+            }
+        })
+    });
+</script>
+
 </html>

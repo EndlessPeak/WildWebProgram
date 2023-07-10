@@ -56,10 +56,12 @@ def index():
 The following part is responsible for send files from specified folders to the client
 Warning: Do not store any user-uploaded content or system calculation results in the static folder!
 '''
-UPLOAD_IMAGE_FOLDER = './sources/x_image/'
-INFER_IMAGE_FOLDER = './sources/y_image/'
+UPLOAD_IMAGE_FOLDER = './sources/upload_image/'
+INFER_IMAGE_FOLDER = './sources/infer_image/'
+CROP_IMAGE_FOLDER = './sources/crop_image'
 app.config['UPLOAD_IMAGE_FOLDER'] = UPLOAD_IMAGE_FOLDER
 app.config['INFER_IMAGE_FOLDER'] = INFER_IMAGE_FOLDER
+app.config['CROP_IMAGE_FOLDER'] = CROP_IMAGE_FOLDER
 
 @app.route('/request_upload_image/<filename>')
 def display_upload_image(filename):
@@ -102,7 +104,7 @@ def upload_image():
     print(fid)
 
     fName = fid +'.jpg'
-    file_path = os.path.join(r'./sources/x_image', fName)
+    file_path = os.path.join(app.config['UPLOAD_IMAGE_FOLDER'], fName)
 
     # make sure the directory exist
     os.makedirs(os.path.dirname(file_path),exist_ok=True)
@@ -127,14 +129,18 @@ def infer_image():
     global fName
 
     # set input and output path
-    inputdir = app.config['UPLOAD_IMAGE_FOLDER'] + fName 
+    inputdir = app.config['UPLOAD_IMAGE_FOLDER'] + fName
     outputdir = app.config['INFER_IMAGE_FOLDER'] + fName 
 
     # check whether file is already exists
     if not os.path.exists(outputdir):
         # Considering start a new thread to excute this function
-        t = threading.Thread(target = infer_image_backend, args=(inputdir,outputdir,app))
-        t.start()
+        # t = threading.Thread(target = infer_image_backend, args=(inputdir,outputdir,app))
+        # t.start()
+        
+        # Now we are considering using JavaScript message mechanism to block the user
+        # instead of starting a new thread to execute the function.
+        infer_image_backend(inputdir,outputdir,fName,app)
 
     infer_image_url = '/request_infer_image/' + fName
 
