@@ -5,12 +5,14 @@ python flask part
 3. session package provides a mechanism to store data between user requests
 4. request allows us to retrieve data from the HTTP requests sent by the client
 5. send_from_directory can be used to send files from a specified directory as a response
+6. jsonify
 '''
 from flask import Flask
 from flask import render_template
 from flask import session
 from flask import request 
 from flask import send_from_directory
+from flask import jsonify
 
 '''
 python basic part
@@ -116,8 +118,18 @@ def upload_image():
     f.save(file_path)
     # fName = f.filename
 
-    upload_image_url = '/request_upload_image/' + fName
-    return render_template('display_upload_image.html',url = upload_image_url)
+    response = {
+        "code": 0,
+        "msg": "上传成功",
+        "data": {
+            "fileUrl": '/request_upload_image/' + fName
+        }
+    }
+
+    # upload_image_url = '/request_upload_image/' + fName
+    return jsonify(response)
+    # comment render function temporarily
+    # return render_template('display_upload_image.html',url = upload_image_url)
 
 '''
 The following part is responsible for infering image files.
@@ -152,4 +164,4 @@ def infer_image():
 
 if __name__=='__main__':
     host = '127.0.0.1'
-    app.run(host=host,debug=False)
+    app.run(host=host,debug=True)

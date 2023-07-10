@@ -11,11 +11,38 @@
 </head>
 
 <body>
+    <script>
+        layui.use(function () {
+            var element = layui.element;
+            element.render('nav');
+        });
+    </script>
+
     <!-- header part -->
     <div class="layui-header ws-header ws-bg-light">
-        <ul class="layui-nav" layui-bg-cyan>
-            <li class="layui-nav-item" style="padding:5px">野山参等级分类系统</li>
-        </ul>
+        <div class="ws-logo">
+            <a href="/">野山参等级分类系统</a>
+        </div>
+        <div class="ws-header-menu">
+            <ul class="layui-nav layui-bg-gray ws-bg-light">
+                <li class="layui-nav-item">
+                    <a href="javascript:;">子级</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="nav.html">菜单1</a></dd>
+                        <dd><a href="nav.html">菜单2</a></dd>
+                        <dd><a href="nav.html">菜单3</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;">选项</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="nav.html">选项1</a></dd>
+                        <dd class="layui-this"><a href="nav.html">选项2</a></dd>
+                        <dd><a href="nav.html">选项3</a></dd>
+                    </dl>
+                </li>
+            </ul>
+        </div>
     </div>
 
     <div class="ws-container">
