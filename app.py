@@ -130,16 +130,18 @@ def infer_image():
     inputdir = app.config['UPLOAD_IMAGE_FOLDER'] + fName 
     outputdir = app.config['INFER_IMAGE_FOLDER'] + fName 
 
-    # Considering start a new thread to excute this function
-    t = threading.Thread(target = infer_image_backend, args=(inputdir,outputdir,app))
-    t.start()
+    # check whether file is already exists
+    if not os.path.exists(outputdir):
+        # Considering start a new thread to excute this function
+        t = threading.Thread(target = infer_image_backend, args=(inputdir,outputdir,app))
+        t.start()
 
     infer_image_url = '/request_infer_image/' + fName
 
     # clean fid and fName variables
     # the process should be delayed
-    fid = ''
-    fName = ''
+    # fid = ''
+    # fName = ''
     return render_template('display_predict_result.html',url=infer_image_url)
 
 if __name__=='__main__':
