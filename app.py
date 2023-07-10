@@ -26,8 +26,9 @@ import os
 import hashlib
 import uuid
 import secrets 
-import threading
+# import threading
 
+from utils.infer_image_module import crop_image_backend
 from utils.infer_image_module import infer_image_backend
 
 # Constant
@@ -60,7 +61,7 @@ Warning: Do not store any user-uploaded content or system calculation results in
 '''
 UPLOAD_IMAGE_FOLDER = './sources/upload_image/'
 INFER_IMAGE_FOLDER = './sources/infer_image/'
-CROP_IMAGE_FOLDER = './sources/crop_image'
+CROP_IMAGE_FOLDER = './sources/crop_image/'
 app.config['UPLOAD_IMAGE_FOLDER'] = UPLOAD_IMAGE_FOLDER
 app.config['INFER_IMAGE_FOLDER'] = INFER_IMAGE_FOLDER
 app.config['CROP_IMAGE_FOLDER'] = CROP_IMAGE_FOLDER
@@ -72,6 +73,10 @@ def display_upload_image(filename):
 @app.route('/request_infer_image/<filename>')
 def display_infer_image(filename):
     return send_from_directory(app.config['INFER_IMAGE_FOLDER'],filename)
+
+@app.route('/request_crop_image/<filename>')
+def display_crop_image(filename):
+    return send_from_directory(app.config['CROP_IMAGE_FOLDER'],filename)
 
 '''
 The following part is responsible for user login
@@ -132,6 +137,32 @@ def upload_image():
     # return render_template('display_upload_image.html',url = upload_image_url)
 
 '''
+The following part is responsible for cropping image files.
+'''
+@app.route('/crop_image',methods=['GET', 'POST'])
+def crop_image():
+    global fid
+    global fName
+
+    # set input and output path
+    inputdir = app.config['UPLOAD_IMAGE_FOLDER'] + fName
+    outputdir = app.config['CROP_IMAGE_FOLDER'] + fName
+
+    # check whether file is already exists
+    if not os.path.exists(outputdir):
+        crop_image_backend(inputdir,outputdir)
+
+    response = {
+        "code": 0,
+        "msg": "裁剪成功",
+        "data": {
+            "fileUrl": '/request_crop_image/' + fName
+        }
+    }
+
+    return jsonify(response)
+
+'''
 The following part is responsible for infering image files.
 After the user-uploaded file is stored, it will be sent to the inference module in the backend.
 '''
@@ -140,8 +171,13 @@ def infer_image():
     global fid
     global fName
 
+    crop = True
     # set input and output path
-    inputdir = app.config['UPLOAD_IMAGE_FOLDER'] + fName
+    if crop :
+        inputdir = app.config['CROP_IMAGE_FOLDER'] + fName
+    else:
+        inputdir = app.config['UPLOAD_IMAGE_FOLDER'] + fName
+        
     outputdir = app.config['INFER_IMAGE_FOLDER'] + fName 
 
     # check whether file is already exists
